@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mlpipe-preprocess-1
+  labels:
+    app: ml-app
+    role: preprocess
+spec:
+  nodeSelector:
+    kubernetes.io/hostname: node2
+  restartPolicy: OnFailure
+  containers:
+    - name: ml
+      image: local-ml-app:latest
+      imagePullPolicy: IfNotPresent
+      env:
+        - name: ROLE
+          value: preprocess
+        - name: LISTEN_PORT
+          value: "5001"
+        - name: TRAIN_HOST
+          value: mlpipe-train
+        - name: TRAIN_PORT
+          value: "10020"
+        - name: TEST_HOST
+          value: mlpipe-test
+        - name: TEST_PORT
+          value: "10030"
+      ports:
+        - containerPort: 5001
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mlpipe-preprocess
+  labels:
+    app: ml-app
+    role: preprocess
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 10010
+      targetPort: 5001
+      name: worker
+    - port: 10011
+      targetPort: 5001
+      name: cache-server
+  selector:
+    app: ml-app
+    role: preprocess
+  externalIPs:
+    - 10.0.0.234

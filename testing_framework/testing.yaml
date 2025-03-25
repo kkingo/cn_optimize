@@ -1,0 +1,130 @@
+# Auto-generated at 2025-03-16T18:28:21.960069
+
+
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: iperf-node1-1
+  labels:
+    app: iperf-node
+    node: node1
+    instance: "1"
+spec:
+  nodeName: node1
+  containers:
+  - name: iperf-server
+    image: networkstatic/iperf3
+    command: ["/bin/sh", "-c"]
+    args:
+    - "iperf3 -s -D && tail -f /dev/null"
+    ports:
+    - containerPort: 5201
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-node1-pod1
+  labels:
+    app: iperf-service
+    node: node1
+    instance: "1"
+spec:
+  clusterIP: 10.96.0.100
+  selector:
+    app: iperf-node
+    node: node1
+    instance: "1"
+  ports:
+  - protocol: TCP
+    port: 5201
+    targetPort: 5201
+
+
+
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: iperf-node2-1
+  labels:
+    app: iperf-node
+    node: node2
+    instance: "1"
+spec:
+  nodeName: node2
+  containers:
+  - name: iperf-server
+    image: networkstatic/iperf3
+    command: ["/bin/sh", "-c"]
+    args:
+    - "iperf3 -s -D && tail -f /dev/null"
+    ports:
+    - containerPort: 5201
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-node2-pod1
+  labels:
+    app: iperf-service
+    node: node2
+    instance: "1"
+spec:
+  clusterIP: 10.96.0.101
+  selector:
+    app: iperf-node
+    node: node2
+    instance: "1"
+  ports:
+  - protocol: TCP
+    port: 5201
+    targetPort: 5201
+
+
+
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: iperf-node3-1
+  labels:
+    app: iperf-node
+    node: node3
+    instance: "1"
+spec:
+  nodeName: node3
+  containers:
+  - name: iperf-server
+    image: networkstatic/iperf3
+    command: ["/bin/sh", "-c"]
+    args:
+    - "iperf3 -s -D && tail -f /dev/null"
+    ports:
+    - containerPort: 5201
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-node3-pod1
+  labels:
+    app: iperf-service
+    node: node3
+    instance: "1"
+spec:
+  clusterIP: 10.96.0.102
+  selector:
+    app: iperf-node
+    node: node3
+    instance: "1"
+  ports:
+  - protocol: TCP
+    port: 5201
+    targetPort: 5201
+

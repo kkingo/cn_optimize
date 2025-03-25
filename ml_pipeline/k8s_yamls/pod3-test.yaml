@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mlpipe-test-3
+  labels:
+    app: ml-app
+    role: test
+spec:
+  nodeSelector:
+    kubernetes.io/hostname: node2
+  restartPolicy: OnFailure
+  containers:
+    - name: ml
+      image: local-ml-app:latest
+      imagePullPolicy: IfNotPresent
+      env:
+        - name: ROLE
+          value: test
+        - name: TEST_PORT
+          value: "5003"
+        - name: MODEL_PORT
+          value: "5003"
+      ports:
+        - containerPort: 5003
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mlpipe-test
+  labels:
+    app: ml-app
+    role: test
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 10030
+      targetPort: 5003
+      name: worker
+    - port: 10031
+      targetPort: 5003
+      name: cache-server
+  selector:
+    app: ml-app
+    role: test
+  externalIPs:
+    - 10.0.0.234

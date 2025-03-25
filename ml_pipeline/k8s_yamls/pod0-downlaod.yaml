@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mlpipe-download-0
+  labels:
+    app: ml-app
+    role: download
+spec:
+  nodeSelector:
+    kubernetes.io/hostname: node2
+  restartPolicy: OnFailure
+  containers:
+    - name: ml
+      image: local-ml-app:latest
+      imagePullPolicy: IfNotPresent
+      env:
+        - name: ROLE
+          value: download
+        - name: NEXT_HOST
+          value: mlpipe-preprocess  # Use service internal DNS name for preprocess module
+        - name: NEXT_PORT
+          value: "10010"
+      ports:
+        - containerPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mlpipe-download
+  labels:
+    app: ml-app
+    role: download
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 10000
+      targetPort: 5000
+      name: worker
+    - port: 10001
+      targetPort: 5000
+      name: cache-server
+  selector:
+    app: ml-app
+    role: download
+  externalIPs:
+    - 10.0.0.234
