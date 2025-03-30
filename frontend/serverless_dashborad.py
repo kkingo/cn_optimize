@@ -409,11 +409,24 @@ def create_bandwidth_line_chart():
     data_0 = bandwidth_data.get(0, [])
     data_1 = bandwidth_data.get(1, [])
 
-    bandwidths_0 = [t[1] for t in data_0]
-    times_0 = [t[0] for t in data_0]
+    filtered_data_0 = []
+    last_x_0 = None
+    for (x, y) in data_0:
+        if last_x_0 is None or x >= last_x_0:
+            filtered_data_0.append((x, y))
+            last_x_0 = x
 
-    bandwidths_1 = [t[1] for t in data_1]
-    times_1 = [t[0] for t in data_1]
+    filtered_data_1 = []
+    last_x_1 = None
+    for (x, y) in data_1:
+        if last_x_1 is None or x >= last_x_1:
+            filtered_data_1.append((x, y))
+            last_x_1 = x
+
+    times_0 = [item[0] for item in filtered_data_0]
+    bandwidths_0 = [item[1] for item in filtered_data_0]
+    times_1 = [item[0] for item in filtered_data_1]
+    bandwidths_1 = [item[1] for item in filtered_data_1]
 
     trace_0 = go.Scatter(
         x=times_0,
@@ -426,7 +439,7 @@ def create_bandwidth_line_chart():
         x=times_1,
         y=bandwidths_1,
         mode='lines+markers',
-        name='Burst'  # optimized=1
+        name='Optimized'  # optimized=1
     )
 
     fig = go.Figure(data=[trace_0, trace_1])
