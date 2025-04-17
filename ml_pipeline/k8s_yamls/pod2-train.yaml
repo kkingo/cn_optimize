@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: mlpipe-train-2
+  name: train-2
   labels:
     app: ml-app
     role: train
@@ -15,20 +15,20 @@ spec:
       imagePullPolicy: IfNotPresent
       env:
         - name: ROLE
-          value: train
+          value: train-2
         - name: LISTEN_PORT
           value: "5002"
         - name: TEST_HOST
-          value: mlpipe-test
+          value: test-3
         - name: MODEL_PORT
-          value: "5003"
+          value: "10030"
       ports:
         - containerPort: 5002
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: mlpipe-train
+  name: train-2
   labels:
     app: ml-app
     role: train

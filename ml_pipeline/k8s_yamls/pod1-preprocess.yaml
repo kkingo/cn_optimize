@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: mlpipe-preprocess-1
+  name: preprocess-1
   labels:
     app: ml-app
     role: preprocess
@@ -15,15 +15,15 @@ spec:
       imagePullPolicy: IfNotPresent
       env:
         - name: ROLE
-          value: preprocess
+          value: preprocess-1
         - name: LISTEN_PORT
           value: "5001"
         - name: TRAIN_HOST
-          value: mlpipe-train
+          value: train-2
         - name: TRAIN_PORT
           value: "10020"
         - name: TEST_HOST
-          value: mlpipe-test
+          value: test-3
         - name: TEST_PORT
           value: "10030"
       ports:
@@ -32,7 +32,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: mlpipe-preprocess
+  name: preprocess-1
   labels:
     app: ml-app
     role: preprocess

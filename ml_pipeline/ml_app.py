@@ -1,3 +1,4 @@
+import json
 import os
 import pickle
 import tempfile
@@ -10,8 +11,6 @@ import threading
 import logging
 import requests
 import shutil
-import copy
-import io
 # ======================
 # Logging configuration
 # ======================
@@ -55,6 +54,32 @@ def download_data():
     X = X.reshape(-1, 28, 28)
     return {'X': X, 'y': y}
 
+
+def jsonlog_send_operation(receivers):
+    FILE = "trans_metrics.json"
+    for receiver in receivers:
+        entry = {
+            "sender": os.environ.get('ROLE', '').lower(),
+            "receiver": receiver,
+        }
+        try:
+            with open(FILE, "w") as f:
+                f.write(json.dumps(entry) + "\n")
+        except Exception as e:
+            print(f"Log error: {str(e)}")
+
+
+def log_send_operation(receivers):
+    FILE = "trans_metrics.pkl"
+    # 先收集所有条目
+    entry = { "sender": os.environ.get('ROLE', '').lower(), "receiver": receivers}
+
+    try:
+        # 使用二进制写入模式，全量覆盖保存
+        with open(FILE, "wb") as f:
+            pickle.dump(entry, f)
+    except Exception as e:
+        print(f"Log error: {str(e)}")
 
 def preprocess_data(data):
     """
@@ -167,6 +192,7 @@ def download_handler():
         next_host = os.environ['NEXT_HOST']  # e.g., "mlpipe-preprocess"
         next_port = os.environ['NEXT_PORT']  # e.g., "5001"
         url = f"http://{next_host}:{next_port}/receive"
+        log_send_operation([next_host])
 
         # Serialize once
         payload = pickle.dumps({'data': raw_data})
@@ -176,6 +202,7 @@ def download_handler():
         def stream_generator():
             """Yield the same pickled payload REPLICATION times in chunks."""
             yield from chunked_data_generator(payload, REPLICATION, 4096)
+
 
         # Send data in a chunked (streamed) manner
         logger.info(f"Sending raw data to {url} in streaming mode, repeated {REPLICATION} times...")
@@ -230,7 +257,7 @@ def preprocess_handler():
 
             payload_train = pickle.dumps({'data': train_data})
             logger.info(f"Preparing to send train data: {len(payload_train)} bytes")
-
+            log_send_operation([train_host, test_host])
             # Define send function with error handling
             def send_data(url, payload):
                 try:
@@ -317,7 +344,7 @@ def train_handler():
             test_host = os.environ['TEST_HOST']  # e.g., "mlpipe-test"
             model_port = os.environ['MODEL_PORT']  # e.g., "5003"
             url_model = f"http://{test_host}:{model_port}/receive_model"
-
+            log_send_operation([test_host])
             def model_generator():
                 yield from chunked_data_generator(serialized_model, REPLICATION, 4096)
 
@@ -418,13 +445,13 @@ def test_handler():
 if __name__ == "__main__":
     role = os.environ.get('ROLE', '').lower()
     logger.info(f"Starting module with role: {role}")
-    if role == 'download':
+    if role == 'download-0':
         download_handler()
-    elif role == 'preprocess':
+    elif role == 'preprocess-1':
         preprocess_handler()
-    elif role == 'train':
+    elif role == 'train-2':
         train_handler()
-    elif role == 'test':
+    elif role == 'test-3':
         test_handler()
     else:
         logger.error("Invalid role specified")
