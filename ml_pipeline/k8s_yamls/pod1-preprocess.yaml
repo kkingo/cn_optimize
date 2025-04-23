@@ -18,11 +18,11 @@ spec:
           value: preprocess-1
         - name: LISTEN_PORT
           value: "5001"
-        - name: TRAIN_HOST
+        - name: NEXT_HOST_TRAIN
           value: train-2
         - name: TRAIN_PORT
           value: "10020"
-        - name: TEST_HOST
+        - name: NEXT_HOST_TEST
           value: test-3
         - name: TEST_PORT
           value: "10030"

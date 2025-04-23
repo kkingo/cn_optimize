@@ -2,6 +2,7 @@ import json
 import os
 import pickle
 import tempfile
+from typing import Dict
 
 import numpy as np
 from sklearn.linear_model import LogisticRegression
@@ -37,7 +38,18 @@ logger.addHandler(console_handler)
 REPLICATION = 6  # Number of times to send data (if needed)
 DATA_SPLIT = 0.6  # Train/test split ratio
 
+def get_env_vars_with_substring(substring: str) -> Dict[str, str]:
+    """
+    Return a dict of environment variables whose names contain the given substring.
 
+    :param substring: The substring to search for within environment variable names.
+    :return: A dict mapping variable names to their values.
+    """
+    return {
+        key: value
+        for key, value in os.environ.items()
+        if substring in key
+    }
 # ===========================
 # Data download and preprocess functions
 # ===========================
@@ -245,12 +257,12 @@ def preprocess_handler():
             train_data, test_data = preprocess_data(raw_data)
 
             # Prepare URLs and payloads
-            train_host = os.environ['TRAIN_HOST']
+            train_host = os.environ['NEXT_HOST_TRAIN']
             train_port = os.environ['TRAIN_PORT']
             url_train = f"http://{train_host}:{train_port}/receive"
             payload_train = pickle.dumps({'data': train_data})
 
-            test_host = os.environ['TEST_HOST']
+            test_host = os.environ['NEXT_HOST_TEST']
             test_port = os.environ['TEST_PORT']
             url_test = f"http://{test_host}:{test_port}/receive_test"
             payload_test = pickle.dumps({'data': test_data})
@@ -341,8 +353,8 @@ def train_handler():
             logger.info(f"Model trained. Serialized model size: {len(serialized_model)} bytes")
 
             # Send the model to test module in streaming form
-            test_host = os.environ['TEST_HOST']  # e.g., "mlpipe-test"
-            model_port = os.environ['MODEL_PORT']  # e.g., "5003"
+            test_host = os.environ['NEXT_HOST_TEST']  # e.g., "mlpipe-test"
+            model_port = os.environ['MODEL_PORT']
             url_model = f"http://{test_host}:{model_port}/receive_model"
             log_send_operation([test_host])
             def model_generator():
@@ -445,6 +457,8 @@ def test_handler():
 if __name__ == "__main__":
     role = os.environ.get('ROLE', '').lower()
     logger.info(f"Starting module with role: {role}")
+    vars_found = get_env_vars_with_substring('NEXT_HOST')
+    log_send_operation(list(vars_found.values()))
     if role == 'download-0':
         download_handler()
     elif role == 'preprocess-1':

@@ -18,7 +18,7 @@ spec:
           value: train-2
         - name: LISTEN_PORT
           value: "5002"
-        - name: TEST_HOST
+        - name: NEXT_HOST_TEST
           value: test-3
         - name: MODEL_PORT
           value: "10030"

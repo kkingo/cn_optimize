@@ -412,7 +412,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    # main()
     # delete_all_custom_chains()
-    # simulation()
+    simulation()
     # optimization()
